@@ -1,0 +1,26 @@
+Customer ID,username,password,Age,Gender,Purchase Amount,Subscription Status,Previous Purchases,Preferred Payment Method,Frequency of Purchases
+1,username1,password1,55,Male,5300,Yes,14,Venmo,Fortnightly
+2,username2,password2,19,Male,6400,Yes,2,Cash,Fortnightly
+3,username3,password3,50,Male,7300,Yes,23,Credit Card,Weekly
+4,username4,password4,21,Male,9000,Yes,49,PayPal,Weekly
+5,username5,password5,45,Male,4900,Yes,31,PayPal,Annually
+6,username6,password6,46,Male,2000,Yes,14,Venmo,Weekly
+7,username7,password7,63,Male,8500,Yes,49,Cash,Quarterly
+8,username8,password8,27,Male,3400,Yes,19,Credit Card,Weekly
+9,username9,password9,26,Male,9700,Yes,8,Venmo,Annually
+10,username10,password10,57,Male,3100,Yes,4,Cash,Quarterly
+11,username11,password11,53,Male,3400,Yes,26,Bank Transfer,Bi-Weekly
+12,username12,password12,30,Male,6800,Yes,10,Bank Transfer,Fortnightly
+13,username13,password13,61,Male,7200,Yes,37,Venmo,Fortnightly
+14,username14,password14,65,Male,5100,Yes,31,PayPal,Weekly
+15,username15,password15,64,Male,5300,No,34,Debit Card,Weekly
+16,username16,password16,64,Male,8100,No,8,PayPal,Monthly
+17,username17,password17,25,Male,3600,No,44,Debit Card,Bi-Weekly
+18,username18,password18,53,Male,3800,No,36,Venmo,Quarterly
+19,username19,password19,52,Male,4800,No,17,Cash,Weekly
+20,username20,password20,66,Male,9000,Yes,46,Debit Card,Bi-Weekly
+21,username21,password21,21,Male,5100,Yes,50,Cash,Every 3 Months
+22,username22,password22,31,Male,6200,Yes,22,Debit Card,Quarterly
+23,username23,password23,56,Male,3700,Yes,32,Debit Card,Annually
+24,username24,password24,31,Male,8800,Yes,40,Credit Card,Weekly
+25,username25,password25,18,Male,2200,Yes,16,Debit Card,Weekly

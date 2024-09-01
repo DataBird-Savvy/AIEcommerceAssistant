@@ -1,0 +1,17 @@
+streamlit
+python-dotenv
+langchain
+streamlit-extras
+faiss-cpu
+langchain-community
+pandas
+PyPDF2
+transformers
+scikit-learn
+torch
+requests
+sentence_transformers
+langchain_openai
+
+langchain-google-genai
+
