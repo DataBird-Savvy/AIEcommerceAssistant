@@ -12,6 +12,7 @@ torch
 requests
 sentence_transformers
 langchain_openai
-
-langchain-google-genai
+selenium 
+webdriver-manager 
+beautifulsoup4
 
