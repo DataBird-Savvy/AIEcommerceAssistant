@@ -28,13 +28,25 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     stream=sys.stdout  # Direct logs to standard output (Terminal)
 )
+def handle_logout():
+    st.session_state.clear()
+    st.session_state.page = 'login'
+    st.rerun()
+
+# Create a layout with two columns
+col1, col2 = st.columns([5, 1])  # Adjust the ratio as needed
+
+# Place the logout button in the top-right column
+with col2:
+    if st.button("Logout"):
+        handle_logout()
 
 class AIChatAssistant:
     def __init__(self):
         self.load_state()
         
         self.chat = ChatOpenAI(
-            model="gpt-4o",  # You can use "gpt-4" if available
+            model="gpt-4-turbo",  # You can use "gpt-4" if available
             temperature=0.8,
             frequency_penalty=0.2
         )
@@ -77,19 +89,19 @@ class AIChatAssistant:
             logging.error(f"Model file not found: {e}")
             st.error("Error loading models. Please check the model files and try again.")
             st.stop()
-            
         # Load data
         self.customer_data = pd.read_csv("customer.csv")
-        self.product_data = self.load_negotiate_data()
+        self.product_data = self.load_negotiate_data() 
         predicted_discount_percentage=self.predict_discount()
-        # predicted_discount_percentage=10
         customer_discount_perscentage=self.get_customer_discount()
-        # customer_discount_perscentage=20
+        
         product_discount = self.product_data['actual_price'] - (self.product_data['actual_price'] * predicted_discount_percentage) / 100
-        self.product_discount = float(product_discount)
+        product_discount = float(product_discount)
+        self.product_discount=round(product_discount,2)
         customer_discount = self.product_data['actual_price'] - (self.product_data['actual_price'] * customer_discount_perscentage) / 100
-        self.customer_discount=((self.product_discount*1)+(customer_discount*2))/3
-        self.customer_discount=float(self.customer_discount)
+        customer_discount=round(((self.product_discount*1)+(customer_discount*2))/3,2)
+        self.customer_discount=float(customer_discount)
+       
         
     
     def get_customer_discount(self):
@@ -164,13 +176,13 @@ class AIChatAssistant:
                                     'discount_percentage', 'rating', 'rating_count', 'about_product', 'img_link', 'username','password']
                 if not data or not all(k in data for k in required_keys):
                     logging.error("Incomplete product data. Please log in and choose a product.")
-                    st.error("Incomplete product data. Please log in and choose a product for order or negotiation.")
+                    st.error("Incomplete product data. Please log in and choose a product for add to cart or negotiation.")
                     st.stop()
                 logging.info("Negotiation data loaded successfully.")
                 return data
         except FileNotFoundError:
             logging.error("Product data file not found.")
-            st.error("No product data file found. Please log in and choose a product for order or negotiation.")
+            st.error("No product data file found. Please log in and choose a product for add to cart or negotiation.")
             st.stop()
         except json.JSONDecodeError:
             logging.error("Error decoding product data file.")
@@ -188,7 +200,7 @@ class AIChatAssistant:
         2. Verifying Registration: User is asking about account verification or registration.
         3. Registered Customer: User is telling that registered person.
         4. Not Registered: User is telling that not registered person.
-        5. Placing Order: User wants to place an order or proceed with a purchase.
+        5. Placing Order: User wants to order the product or proceed with a purchase.
         6. Not Placing Order: User explicitly indicates they do not want to place an order.
         7. Looking for Alternatives: User wants to know about other products or alternatives.
         8. General Inquiry: User is asking about product details or has a general question.
@@ -296,8 +308,9 @@ class AIChatAssistant:
                 if self.expected_price < self.product_discount:
                     template = "an accurate reply format only 'for asking if user is a subscribed customer'."
                 else:
-                    template = "an accurate reply format only for in single sentence  for  Please confirm if you are comfortable with the price of {expected_price}, and if so, confirm order?"
+                    template = "an accurate reply format only for in single sentence  for if you are comfortable with the price of {expected_price}, and if so, confirm order?"
                     st.session_state['order_accepted'] = True
+                    self.expected_price = None
             else:
                 template="an accurate reply format only 'what is your expected price?'."
                 
@@ -309,11 +322,13 @@ class AIChatAssistant:
             
         elif self.intent == "Registered Customer":
             result=self.verify_account()
+            
+            logging.info(f"result: {result}")
          
             if result == True:
                 
                 if self.expected_price is not None and self.customer_discount<self.expected_price < self.product_discount:
-                    template = "an accurate asking format only in single sentence  for  Please confirm if you're comfortable with the expected price of {expected_price}; if so,confirm order."
+                    template = "an accurate asking format only in single sentence  for  if you're comfortable with the expected price of {expected_price}; if so,confirm order."
                     st.session_state['order_accepted'] = True
                 else:
                     template = "an accurate reply format only for According to your purchase history, the maximum discount available for this product is {customer_discount}and  Are you okay to confirm order."
@@ -342,10 +357,10 @@ class AIChatAssistant:
             
             
         elif self.intent == "Placing Order":
-            template = "an accurate reply format only  for  Order placed successfully and You will receive a confirmation email with the details shortly."
+            template = "an accurate reply format only  for  product added to cart  and You can  check the details on your account."
             st.session_state['order_accepted'] = True
-            st.success("Great! Your order has been placed.")
-            logging.info("Order placed.")
+            st.success("Great! Product has been added to cart.")
+            logging.info("Product Added.")
             
             
         elif self.intent == "General Inquiry":
@@ -360,6 +375,8 @@ class AIChatAssistant:
     
     def verify_account(self):
         
+        logging.info(f"username: {self.product_data['username']}")
+        logging.info(f"password: {self.product_data['password']}")
         
         user_row = self.customer_data[
             (self.customer_data['username'] == self.product_data['username']) & 
@@ -369,7 +386,7 @@ class AIChatAssistant:
         # Return True if the user is found and has a subscription, otherwise False
         if not user_row.empty:
             return True
-        return True
+        return False
 
     def generate_response(self, prompt):
         
@@ -408,7 +425,7 @@ class AIChatAssistant:
         st.write(f"**MRP: <span style='font-size:24px;'>₹ {self.product_data['actual_price']}</span>**", unsafe_allow_html=True)
                 
     def display_ui(self):
-        st.set_page_config(page_title="Nego Savy Assistant", layout="wide")
+        
         # st.write(css, unsafe_allow_html=True)
         
 
@@ -420,16 +437,16 @@ class AIChatAssistant:
         if not st.session_state['order_placed']:
             # st.subheader("Ready to Order?")
             st.header("Hey, Let's Make a Deal")
-            st.write("If you're happy with the price and ready to place your order, click the button below:")
+            
 
             order_col1, order_col2 = st.columns([1, 1])
 
             with order_col1:
                 if not st.session_state['show_negotiation']:
-                    if st.button("Yes, I'm ready to order!"):
+                    if st.button("Ready to order? Click here to finalize your purchase!"):
                         st.session_state['order_placed'] = True
-                        st.success("Great! Your order has been placed.")
-                        logging.info("Order placed.")
+                        st.success("Great! Product has been added to cart.")
+                        logging.info("Product Added to cart.")
 
             with order_col2:
                 if not st.session_state['show_negotiation']:
@@ -492,3 +509,5 @@ if __name__ == "__main__":
     chat_assistant = AIChatAssistant()
     chat_assistant.display_ui()
     
+    
+        

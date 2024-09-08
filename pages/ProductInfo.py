@@ -23,7 +23,7 @@ class ProductChatbot:
 
     def init_ui(self):
         logging.info("Initializing UI...")
-        st.set_page_config(page_title="Ask me about Product", )
+        
         st.write(css, unsafe_allow_html=True)
         st.header("Product Information Assistant")
         if "conversation" not in st.session_state:
@@ -77,7 +77,7 @@ class ProductChatbot:
         user_question = st.text_input("Feel free to ask any questions about the product you've chosen:")
         if user_question:
             try:
-                with open('artifacts/product_info.txt', 'r') as file:
+                with open('artifacts/product_info.txt',  encoding='utf-8') as file:
                     raw_text = file.read()
 
                 text_chunks = self.get_text_chunks(raw_text)

@@ -14,10 +14,7 @@ import os
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# GENERAL SETTINGS
-PAGE_TITLE = "Nego Savy Assistant"
-PAGE_ICON = ":wave:"
-st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
+
 
 # Initialize Sentence-Transformer model
 @st.cache_resource
@@ -37,6 +34,9 @@ class EcommerceChatAssistant:
         self.model = load_model()
         self.summarizer = load_summarizer()
         self.data = self.load_data(data_path)
+        
+        if 'Negotiation_started' not in st.session_state:
+            st.session_state.Negotiation_started = False
 
         # Check and store embeddings in session state
         if 'embeddings' not in st.session_state:
@@ -195,24 +195,26 @@ class EcommerceChatAssistant:
         st.header("Recommendations")
         
         for product in recommendations:
-            st.subheader(f"Product ID: {product['product_id']}")
-            st.write(f"Product Name: {product['product_name']}")
-            st.write(f"**Actual Price:  ₹ {str(product['actual_price']).upper()}**")
-            st.write(f"Category: {product['category']}")
-            st.write(f"Rating: {product['rating']} ({product['rating_count']})")
-            
-            # Display the summarized 'about_product'
-            summarized_about_product = self.summarize_about_product(product.get('about_product', 'No description available.'))
-            st.write(f"**About this product:** {summarized_about_product}")
+            if st.session_state.Negotiation_started ==False:
+                st.subheader(f"Product ID: {product['product_id']}")
+                st.write(f"Product Name: {product['product_name']}")
+                st.write(f"**Actual Price:  ₹ {str(product['actual_price']).upper()}**")
+                st.write(f"Category: {product['category']}")
+                st.write(f"Rating: {product['rating']} ({product['rating_count']})")
+                
+                # Display the summarized 'about_product'
+                summarized_about_product = self.summarize_about_product(product.get('about_product', 'No description available.'))
+                st.write(f"**About this product:** {summarized_about_product}")
 
-            # Display the image
-            st.image(product['img_link'], use_column_width=True)
+                # Display the image
+                st.image(product['img_link'], use_column_width=True)
 
-            # Adding "Negotiate" button
-            if st.button(f"Proceed with Order/Negotiation for Product ID: {product['product_id']}", key=f"negotiate_{product['product_id']}"):
-                self.save_negotiation(product)
-                self.extract_amazon_product_info(product['product_link'])
-                st.success(f"Negotiation/Order in Progress for Product ID: {product['product_id']}. Please proceed to the Negotiation Page for further details.")
+                # Adding "Negotiate" button
+                if st.button(f"Proceed with Order/Negotiation for Product ID: {product['product_id']}", key=f"negotiate_{product['product_id']}"):
+                    st.session_state.Negotiation_started = True
+                    self.save_negotiation(product)
+                    self.extract_amazon_product_info(product['product_link'])
+                    st.success(f"Negotiation/Order in Progress for Product ID: {product['product_id']}. Please proceed to the Negotiation Page for further details.")
 
     # Main run loop of the app
     def run(self):
